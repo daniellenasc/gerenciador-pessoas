@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 import { Link } from "react-router-dom";
+import ModalCreateUser from "../components/ModalCreateUser";
 
 function HomePage() {
   const [users, setUsers] = useState([]);
@@ -61,6 +62,8 @@ function HomePage() {
             })}
           </tbody>
         </Table>
+
+        <ModalCreateUser />
       </Container>
     </div>
   );
