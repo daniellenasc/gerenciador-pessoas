@@ -17,6 +17,7 @@ function HomePage() {
         );
         //console.log(response.data);
         setUsers(response.data);
+        //console.log("Dentro do useEffect da Home")
       } catch (error) {
         console.error(error);
       }

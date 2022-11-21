@@ -2,7 +2,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { Container, Card, Button, Row, Col, Form } from "react-bootstrap";
+import {
+  Container,
+  Card,
+  Button,
+  Row,
+  Col,
+  Form,
+  Spinner,
+} from "react-bootstrap";
 
 function DetailPage() {
   //pegar o ID da URL -> desconstruir o useParams e colocar dentro das chaves o mesmo nome que foi usado como parâmetro de rota no App.js
@@ -11,6 +19,10 @@ function DetailPage() {
 
   //state para guardar esse id depois da requisição
   const [user, setUser] = useState([]);
+
+  const stack = ["React", "JS", "HTML", "CSS", "NodeJS", "MongoDB", "Express"];
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const [reload, setReload] = useState(false); //TOGGLE para o useEffect do get, para ele rodar de novo quando houver alteração e renderizar atualizado
 
@@ -42,6 +54,7 @@ function DetailPage() {
         );
         setUser(response.data);
         setForm(response.data); //para que o formulário de edição já venha preenchido com os dados do funcionário
+        setIsLoading(false);
       } catch (error) {
         console.error(error);
         toast.error("Algo deu errado. Tente novamente.");
@@ -93,222 +106,291 @@ function DetailPage() {
     }
   }
 
+  //função assíncrona para o Card Stacks
+  async function handleStack(e) {
+    //console.log(e.target.checked) //-> true ou false para cada checkbox que é clicado
+    //console.log(e.target.name) -> //-> para saber o nome de qual checkbox foi clicado (a tech)
+    try {
+      //clonar o user para deletar o id
+      const clone = { ...user };
+      delete clone._id;
+
+      //adicionar a tech na array
+      if (e.target.checked === true) {
+        clone.stack.push(e.target.name);
+      }
+
+      //retirar a tech da array
+      if (e.target.checked === false) {
+        const index = clone.stack.indexOf(e.target.name);
+        clone.stack.splice(index, 1);
+      }
+
+      await axios.put(
+        `https://ironrest.cyclic.app/projeto02-df/${userID}`,
+        clone
+      );
+      setReload(!reload);
+    } catch (error) {
+      console.error(error);
+      toast.error("Algo deu errado. Tente novamente.");
+    }
+  }
+
+  //console.log(form);
+  //console.log(user)
+
   return (
     /* CARD DETALHES */
     <Container className="my-4">
-      {showEdit === false && (
-        <Card className="text-center">
-          <Card.Header>
-            <Card.Title>{user.nome}</Card.Title>
-            <Card.Subtitle className="mb-2 text-muted">
-              Data de Admissão: {user.dataAdmissao}
-            </Card.Subtitle>
-          </Card.Header>
-          <Card.Body>
-            <Row>
-              <Col>
-                <Card.Title>E-mail</Card.Title>
-                <Card.Text>{user.email}</Card.Text>
+      {isLoading === false && (
+        <>
+          {showEdit === false && (
+            <Card className="text-center">
+              <Card.Header>
+                <Card.Title>{user.nome}</Card.Title>
+                <Card.Subtitle className="mb-2 text-muted">
+                  Data de Admissão: {user.dataAdmissao}
+                </Card.Subtitle>
+              </Card.Header>
+              <Card.Body>
+                <Row>
+                  <Col>
+                    <Card.Title>E-mail</Card.Title>
+                    <Card.Text>{user.email}</Card.Text>
 
-                <Card.Title>Departamento</Card.Title>
-                <Card.Text>{user.departamento}</Card.Text>
+                    <Card.Title>Departamento</Card.Title>
+                    <Card.Text>{user.departamento}</Card.Text>
 
-                <Card.Title>Status</Card.Title>
-                <Card.Text>{user.status}</Card.Text>
-              </Col>
+                    <Card.Title>Status</Card.Title>
+                    <Card.Text>{user.status}</Card.Text>
+                  </Col>
 
-              <Col>
-                <Card.Title>Telefone</Card.Title>
-                <Card.Text>{user.tel}</Card.Text>
+                  <Col>
+                    <Card.Title>Telefone</Card.Title>
+                    <Card.Text>{user.tel}</Card.Text>
 
-                <Card.Title>Cargo</Card.Title>
-                <Card.Text>{user.cargo}</Card.Text>
+                    <Card.Title>Cargo</Card.Title>
+                    <Card.Text>{user.cargo}</Card.Text>
 
-                <Card.Text>
-                  {user.active ? "Ativo na empresa" : "Inativo na empresa"}
-                </Card.Text>
-              </Col>
-              <Col>
-                <img
-                  src={user.foto}
-                  alt="pequena foto de perfil do usuário"
-                  height={150}
-                  style={{ borderRadius: "50%" }}
-                />
-              </Col>
-            </Row>
-          </Card.Body>
-          <Card.Footer className="text-muted">
-            <Row>
-              <Col>
-                <Button
-                  variant="outline-success"
-                  onClick={() => setShowEdit(true)}
-                >
-                  Editar funcionário
-                </Button>
-              </Col>
-              <Col>
-                <Button variant="outline-danger" onClick={handleDelete}>
-                  Excluir funcionário
-                </Button>
-              </Col>
-            </Row>
-          </Card.Footer>
-        </Card>
-      )}
-
-      {/* CARD EDITAR */}
-      {showEdit === true && (
-        <Card className="text-center">
-          <Card.Body>
-            <Form>
-              <Row>
-                <Col>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Nome do funcionário:</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Insira o nome completo do funcionário"
-                      name="nome" //mesmo nome da chave do form
-                      value={form.nome} //para controlar o input
-                      onChange={handleChange}
-                      autoFocus //para esse inout já ficar selecionado quando o modal for aberto
+                    <Card.Text>
+                      {user.active ? "Ativo na empresa" : "Inativo na empresa"}
+                    </Card.Text>
+                  </Col>
+                  <Col>
+                    <img
+                      src={user.foto}
+                      alt="pequena foto de perfil do usuário"
+                      height={150}
+                      style={{ borderRadius: "50%" }}
                     />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Cargo:</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Insira o cargo do funcionário"
-                      name="cargo" //mesmo nome da chave do form
-                      value={form.cargo} //para controlar o input
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row>
-                <Col>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Telefone:</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="+xx xxxx-xxxxx"
-                      name="tel" //mesmo nome da chave do form
-                      value={form.tel} //para controlar o input
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Email:</Form.Label>
-                    <Form.Control
-                      type="email"
-                      placeholder="exemplo@email.com"
-                      name="email" //mesmo nome da chave do form
-                      value={form.email} //para controlar o input
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row>
-                <Col>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Salário:</Form.Label>
-                    <Form.Control
-                      type="number"
-                      placeholder="$"
-                      name="salario" //mesmo nome da chave do form
-                      value={form.salario} //para controlar o input
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Departamento:</Form.Label>
-                    <Form.Select
-                      name="departamento"
-                      onChange={handleChange}
-                      defaultValue={form.departamento}
+                  </Col>
+                </Row>
+              </Card.Body>
+              <Card.Footer className="text-muted">
+                <Row>
+                  <Col>
+                    <Button
+                      variant="outline-success"
+                      onClick={() => setShowEdit(true)}
                     >
-                      <option>Selecione uma opção</option>
-                      <option value="Front-End">Front-End</option>
-                      <option value="Back-End">Back-End</option>
-                      <option value="Full-Stack">Full-Stack</option>
-                      <option value="Mobile">Mobile</option>
-                      <option value="Financeiro">Financeiro</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="People">People</option>
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              </Row>
+                      Editar funcionário
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button variant="outline-danger" onClick={handleDelete}>
+                      Excluir funcionário
+                    </Button>
+                  </Col>
+                </Row>
+              </Card.Footer>
+            </Card>
+          )}
 
-              <Row>
-                <Col>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Data de admissão:</Form.Label>
-                    <Form.Control
-                      type="date"
-                      name="dataAdmissao" //mesmo nome da chave do form
-                      value={form.dataAdmissao} //para controlar o input
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
+          {/* CARD EDITAR */}
+          {showEdit === true && (
+            <Card className="text-center">
+              <Card.Body>
+                <Form>
+                  <Row>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Nome do funcionário:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Insira o nome completo do funcionário"
+                          name="nome" //mesmo nome da chave do form
+                          value={form.nome} //para controlar o input
+                          onChange={handleChange}
+                          autoFocus //para esse inout já ficar selecionado quando o modal for aberto
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Cargo:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Insira o cargo do funcionário"
+                          name="cargo" //mesmo nome da chave do form
+                          value={form.cargo} //para controlar o input
+                          onChange={handleChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
 
-                <Col>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Foto:</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Insira a URL da foto do funcionário"
-                      name="foto" //mesmo nome da chave do form
-                      value={form.foto} //para controlar o input
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </Form>
-          </Card.Body>
-          <Card.Footer className="text-muted">
-            <Row>
-              <Col>
-                <Button
-                  variant="outline-danger"
-                  onClick={() => setShowEdit(false)}
-                >
-                  Voltar
-                </Button>
-              </Col>
-              <Col>
-                <Form.Group>
-                  <Form.Check
-                    type="checkbox"
-                    label="Funcionário ativo na empresa"
-                    name="active"
-                    checked={form.active}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col>
-                <Button variant="outline-success" onClick={handleSubmit}>
-                  Salvar alterações
-                </Button>
-              </Col>
-            </Row>
-          </Card.Footer>
-        </Card>
+                  <Row>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Telefone:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="+xx xxxx-xxxxx"
+                          name="tel" //mesmo nome da chave do form
+                          value={form.tel} //para controlar o input
+                          onChange={handleChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Email:</Form.Label>
+                        <Form.Control
+                          type="email"
+                          placeholder="exemplo@email.com"
+                          name="email" //mesmo nome da chave do form
+                          value={form.email} //para controlar o input
+                          onChange={handleChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <Row>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Salário:</Form.Label>
+                        <Form.Control
+                          type="number"
+                          placeholder="$"
+                          name="salario" //mesmo nome da chave do form
+                          value={form.salario} //para controlar o input
+                          onChange={handleChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Departamento:</Form.Label>
+                        <Form.Select
+                          name="departamento"
+                          onChange={handleChange}
+                          defaultValue={form.departamento}
+                        >
+                          <option>Selecione uma opção</option>
+                          <option value="Front-End">Front-End</option>
+                          <option value="Back-End">Back-End</option>
+                          <option value="Full-Stack">Full-Stack</option>
+                          <option value="Mobile">Mobile</option>
+                          <option value="Financeiro">Financeiro</option>
+                          <option value="Marketing">Marketing</option>
+                          <option value="People">People</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <Row>
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Data de admissão:</Form.Label>
+                        <Form.Control
+                          type="date"
+                          name="dataAdmissao" //mesmo nome da chave do form
+                          value={form.dataAdmissao} //para controlar o input
+                          onChange={handleChange}
+                        />
+                      </Form.Group>
+                    </Col>
+
+                    <Col>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Foto:</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Insira a URL da foto do funcionário"
+                          name="foto" //mesmo nome da chave do form
+                          value={form.foto} //para controlar o input
+                          onChange={handleChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                </Form>
+              </Card.Body>
+              <Card.Footer className="text-muted">
+                <Row>
+                  <Col>
+                    <Button
+                      variant="outline-danger"
+                      onClick={() => setShowEdit(false)}
+                    >
+                      Voltar
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Form.Group>
+                      <Form.Check
+                        type="checkbox"
+                        label="Funcionário ativo na empresa"
+                        name="active"
+                        checked={form.active}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col>
+                    <Button variant="outline-success" onClick={handleSubmit}>
+                      Salvar alterações
+                    </Button>
+                  </Col>
+                </Row>
+              </Card.Footer>
+            </Card>
+          )}
+
+          {/* CARD STACK*/}
+          <Row>
+            <Col className="mt-3 col-3">
+              <Card bg="light">
+                <Card.Header>
+                  <Card.Title>Stack</Card.Title>
+                </Card.Header>
+                <Card.Body>
+                  {stack.map((tech) => {
+                    return (
+                      <Form.Group className="mb-3" key={tech}>
+                        <Form.Check
+                          type="checkbox"
+                          label={tech}
+                          name={tech}
+                          onChange={handleStack}
+                          checked={user.stack.includes(tech)} //para deixar o checkbox marcado com a stack que está na array - PARA ISSO FAZER O ISLOADING
+                        />
+                      </Form.Group>
+                    );
+                  })}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </>
+      )}
+      {isLoading === true && (
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
       )}
     </Container>
   );
