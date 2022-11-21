@@ -34,7 +34,7 @@ function ModalCreateUser({ reload, setReload }) {
   async function handleSubmit(e) {
     try {
       e.preventDefault();
-      await axios.post("https://ironrest.cyclic.app/projeto02-92", form);
+      await axios.post("https://ironrest.cyclic.app/projeto02-df", form);
       handleClose(); //fechar o modal
       //limpar o formulário:
       setForm({

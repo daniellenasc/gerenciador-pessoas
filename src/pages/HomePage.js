@@ -13,7 +13,7 @@ function HomePage() {
     async function fetchUsers() {
       try {
         const response = await axios.get(
-          "https://ironrest.cyclic.app/projeto02-92"
+          "https://ironrest.cyclic.app/projeto02-df"
         );
         //console.log(response.data);
         setUsers(response.data);
