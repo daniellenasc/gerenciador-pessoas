@@ -1,4 +1,4 @@
-import { Container, Table, Button } from "react-bootstrap";
+import { Container, Table, Button, ProgressBar } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -36,7 +36,7 @@ function HomePage() {
             <tr>
               <th>Nome</th>
               <th>Task</th>
-              <th>%</th>
+              <th>Progresso</th>
               <th>Status</th>
               <th>Departamento</th>
               <th>Action</th>
@@ -48,7 +48,13 @@ function HomePage() {
                 <tr key={user._id}>
                   <td>{user.nome}</td>
                   <td>{user.task}</td>
-                  <td>{user.progresso}</td>
+                  <td>
+                    <ProgressBar
+                      animated
+                      now={user.progresso}
+                      label={`${user.progresso}%`}
+                    />
+                  </td>
                   <td>{user.status}</td>
                   <td>{user.departamento}</td>
                   <td>

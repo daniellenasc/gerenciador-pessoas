@@ -137,7 +137,7 @@ function DetailPage() {
     }
   }
 
-  //console.log(form);
+  console.log(form);
   //console.log(user)
 
   return (
@@ -360,9 +360,9 @@ function DetailPage() {
             </Card>
           )}
 
-          {/* CARD STACK*/}
-          <Row>
-            <Col className="mt-3 col-3">
+          <Row className="mt-3 ">
+            {/* CARD STACK*/}
+            <Col className="col-3">
               <Card bg="light">
                 <Card.Header>
                   <Card.Title>Stack</Card.Title>
@@ -381,6 +381,41 @@ function DetailPage() {
                       </Form.Group>
                     );
                   })}
+                </Card.Body>
+              </Card>
+            </Col>
+            {/* CARD TASKS*/}
+            <Col>
+              <Card bg="light">
+                <Card.Header>
+                  <Card.Title>Task</Card.Title>
+                </Card.Header>
+                <Card.Body>
+                  <Form.Group className="mb-3">
+                    <Form.Control
+                      className="mb-4"
+                      type="text"
+                      placeholder="Insira a task que você está trabalhando"
+                      name="task" //mesmo nome da chave do form
+                      value={form.task} //para controlar o input
+                      onChange={handleChange}
+                      autoFocus //para esse inout já ficar selecionado quando o modal for aberto
+                    />
+                    <Form.Group className="mb-3">
+                      <Form.Label>Progresso</Form.Label>
+                      <Form.Range
+                        min="0"
+                        max="100"
+                        value={form.progresso}
+                        name="progresso"
+                        onChange={handleChange}
+                      />
+                      {form.progresso}%
+                    </Form.Group>
+                    <Button variant="outline-success" onClick={handleSubmit}>
+                      Atualizar
+                    </Button>
+                  </Form.Group>
                 </Card.Body>
               </Card>
             </Col>
