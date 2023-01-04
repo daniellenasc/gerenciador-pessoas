@@ -10,6 +10,10 @@ import {
   Col,
   Form,
   Spinner,
+  Badge,
+  Offcanvas,
+  ListGroup,
+  ListGroupItem,
 } from "react-bootstrap";
 
 function DetailPage() {
@@ -28,6 +32,10 @@ function DetailPage() {
 
   //state para aparecer o formulário de edição
   const [showEdit, setShowEdit] = useState(false);
+
+  //state para o offcanvas com a lista de tarefas concluídas
+  //inicia como false pq queremos ele inicialmente fechado
+  const [showTasks, setShowTasks] = useState(false);
 
   //state para editar o funcionário
   const [form, setForm] = useState({
@@ -130,6 +138,40 @@ function DetailPage() {
         `https://ironrest.cyclic.app/projeto02-df/${userID}`,
         clone
       );
+      setReload(!reload);
+    } catch (error) {
+      console.error(error);
+      toast.error("Algo deu errado. Tente novamente.");
+    }
+  }
+
+  //função assíncrona para marcar tarefa como concluída
+  async function handleTaskCompleta(e) {
+    e.preventDefault();
+
+    //verificação - se o input estiver vazio, não é possível marcar a tarefa como concluída
+    if (!form.task) {
+      toast.error("Por favor, adicione uma task!");
+      return;
+    }
+
+    try {
+      const clone = { ...user };
+      delete clone._id;
+
+      //dar um push na task atual para a array de tasks finalizadas
+      clone.tasksFinalizadas.push(clone.task);
+
+      //limpar os inputs
+      clone.task = "";
+      clone.progresso = "0";
+
+      //atualizar a API
+      await axios.put(
+        `https://ironrest.cyclic.app/projeto02-df/${userID}`,
+        clone
+      );
+      toast.success("Task marcada como concluída!");
       setReload(!reload);
     } catch (error) {
       console.error(error);
@@ -412,14 +454,59 @@ function DetailPage() {
                       />
                       {form.progresso}%
                     </Form.Group>
-                    <Button variant="outline-success" onClick={handleSubmit}>
-                      Atualizar
-                    </Button>
+                    <Row>
+                      <Col>
+                        <Button
+                          variant="outline-success"
+                          onClick={handleSubmit}
+                        >
+                          Atualizar
+                        </Button>
+                      </Col>
+                      <Col>
+                        {" "}
+                        <Button
+                          variant="outline-success"
+                          onClick={handleTaskCompleta}
+                        >
+                          Concluir task
+                        </Button>
+                      </Col>
+                      <Col>
+                        <Button
+                          variant="outline-dark"
+                          onClick={() => setShowTasks(true)}
+                        >
+                          Tasks concluídas{" "}
+                          <Badge bg="secondary">
+                            {user.tasksFinalizadas.length}
+                          </Badge>
+                        </Button>
+                      </Col>
+                    </Row>
                   </Form.Group>
                 </Card.Body>
               </Card>
             </Col>
           </Row>
+          <Offcanvas
+            show={showTasks}
+            onHide={() => setShowTasks(false)}
+            placement="end"
+          >
+            <Offcanvas.Header closeButton>
+              <Offcanvas.Title>Tasks finalizadas</Offcanvas.Title>
+            </Offcanvas.Header>
+            <Offcanvas.Body>
+              <ListGroup variant="flush">
+                {user.tasksFinalizadas
+                  .map((task) => {
+                    return <ListGroupItem>{task}</ListGroupItem>;
+                  })
+                  .reverse()}
+              </ListGroup>
+            </Offcanvas.Body>
+          </Offcanvas>
         </>
       )}
       {isLoading === true && (

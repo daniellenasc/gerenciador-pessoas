@@ -16,9 +16,10 @@ function ModalCreateUser({ reload, setReload }) {
     stack: [],
     active: true,
     task: "",
-    progresso: "",
+    progresso: "0",
     foto: "",
     cargo: "",
+    tasksFinalizadas: [],
   });
 
   const handleClose = () => setShow(false);
@@ -51,6 +52,7 @@ function ModalCreateUser({ reload, setReload }) {
         progresso: "",
         foto: "",
         cargo: "",
+        tasksFinalizadas: [],
       });
       toast.success("Novo funcionário cadastrado com sucesso!");
       setReload(!reload); //TOGGLE: mudando de true p/ false e de false p/ true -> para atualizar o get com a lista de funcionários da HomePAge toda vez que um novo funcionário for cadastrado, ou seja, quando o formulário for submetido
