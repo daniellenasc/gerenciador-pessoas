@@ -69,7 +69,7 @@ function DetailPage() {
       }
     }
     fetchUser();
-  }, [reload]); //reload para mostrar as alterações salvas
+  }, [reload, userID]); //reload para mostrar as alterações salvas
   //console.log(user);
 
   async function handleDelete(e) {
