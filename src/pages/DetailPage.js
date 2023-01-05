@@ -179,6 +179,25 @@ function DetailPage() {
     }
   }
 
+  //função para deletar uma task da lista de tasks concluídas:
+  async function handleDeleteTask(index) {
+    try {
+      const clone = { ...user };
+      delete clone._id;
+
+      clone.tasksFinalizadas.splice(index, 1);
+
+      await axios.put(
+        `https://ironrest.cyclic.app/projeto02-df/${userID}`,
+        clone
+      );
+      setReload(!reload);
+    } catch (error) {
+      console.log(error);
+      toast.error("Erro: task não foi excluída.");
+    }
+  }
+
   console.log(form);
   //console.log(user)
 
@@ -500,8 +519,20 @@ function DetailPage() {
             <Offcanvas.Body>
               <ListGroup variant="flush">
                 {user.tasksFinalizadas
-                  .map((task) => {
-                    return <ListGroupItem>{task}</ListGroupItem>;
+                  .map((task, index) => {
+                    return (
+                      <ListGroupItem>
+                        {" "}
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteTask(index)}
+                        >
+                          X
+                        </Button>{" "}
+                        {task}
+                      </ListGroupItem>
+                    );
                   })
                   .reverse()}
               </ListGroup>
